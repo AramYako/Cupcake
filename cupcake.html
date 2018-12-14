@@ -45,7 +45,7 @@
             y:350,
             width:30,
             height:50,
-            jymp:0,
+            jump:0,
             jumpUnit:5,
             onair:false,
             spd:0,
@@ -81,21 +81,46 @@
                                             }
                                              if (event.keyCode==39 && catcher.x<500-catcher.width){
                                                 catcher.spd=5;
-                                              
-
-                                            
-
                                                 catcher.leftPressed=false;
                                                 catcher.rightPressed=true;
+                                            }
+                                            if(event.keyCode==38 && !catcher.onair && catcher.y==350){
+                                                catcher.jump=100;
+                                                catcher.onair=true;
 
                                             }
+                                        }
+                                           
+
+
                                             document.onkeyup = function(event){
                                                 catcher.spd=0;
                                                 catcher.leftPressed=false;
                                                 catcher.rightPressed=false;
                                             }
 
-                                        }
+                                            jumpFunction= function () {
+                                            
+                                    
+                                          if(catcher.jump  >0 && catcher.onair ){
+                                              catcher.y -=catcher.jumpUnit;
+                                              catcher.jump -=catcher.jumpUnit;
+                                          }
+
+
+                                            if(catcher.jump <=0 && catcher.jump >-100 && catcher.onair ) {
+                                                catcher.y +=catcher.jumpUnit;
+                                                catcher.jump -=catcher.jumpUnit;
+                                             
+                                            }
+                                            if(catcher.jump <= -100 && catcher.onair ) {
+                                                catcher.onair=false; 
+                                               
+                                            }
+                                         
+                                            }
+
+                                        
                                         updateCathcerPosition = function(){
                                           
                                             if(catcher.leftPressed && catcher.x > 0){
@@ -136,6 +161,7 @@
 
                                           
                                             updateCathcerPosition();  
+                                            jumpFunction();
                                            
                                         }
 
