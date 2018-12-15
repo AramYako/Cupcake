@@ -27,7 +27,7 @@
         var intervalvar;
         var foodList = [];
         var tileList = [];
-        var foodDrop= [,50,100,150,200,250,300,350,400,450];
+        var foodDrop= [0,50,100,150,200,250,300,350,400,450];
         
         var tileObject = {
             width:50,
@@ -53,6 +53,7 @@
             rightPressed:false,
             gravity:10,
             safe:true
+
         }
 
 
@@ -84,20 +85,40 @@
                                                 catcher.leftPressed=false;
                                                 catcher.rightPressed=true;
                                             }
-                                            if(event.keyCode==38 && !catcher.onair && catcher.y==350){
+                                        if((event.keyCode==38 || event.keyCode==32) && !catcher.onair && catcher.y==350){
                                                 catcher.jump=100;
                                                 catcher.onair=true;
 
                                             }
                                         }
-                                           
-
-
-                                            document.onkeyup = function(event){
+                                                document.onkeyup = function(event){
                                                 catcher.spd=0;
                                                 catcher.leftPressed=false;
                                                 catcher.rightPressed=false;
                                             }
+
+                                            food_catcher_collision = function(f) {
+											return ((f.x < catcher.x + catcher.width) &&
+													(catcher.x < f.x + foodObject.width) &&
+													(f.y < catcher.y + catcher.height) &&
+													(catcher.y < f.y + foodObject.height));
+										}
+
+										food_tile_collision = function(f,t) {
+											return ((f.x < t.x + tileObject.width) &&
+													(t.x < f.x + foodObject.width) &&
+													(f.y < t.y + tileObject.height) &&
+													(t.y < f.y + foodObject.height));	
+										}
+
+                                        catcher_tile_collision = function(t) {
+											return ((catcher.x <= t.x + tileObject.width) &&
+													(t.x <= catcher.x + catcher.width) &&
+													(catcher.y + catcher.height <= t.y));
+										}
+
+
+                                            
 
                                             jumpFunction= function () {
                                             
@@ -120,6 +141,16 @@
                                          
                                             }
 
+                                            updateFoodPosition = function() {
+											for(var i in foodList) {
+												if (foodList[i].y > 500) { 
+													foodList.splice(i,1);
+												}
+												else {
+													foodList[i].y += foodObject.spd;
+												}
+											}
+										}
                                         
                                         updateCathcerPosition = function(){
                                           
@@ -134,6 +165,9 @@
 
 
                                             }
+                                            if(catcher.y>450){
+                                                catcher.y=450;
+                                            }
                                         }
 
                                         updatePosition = function ( )  {  
@@ -144,8 +178,18 @@
                                                                       //The rectangle's width. Positive values are to the right, and negative to the left.
                                                                       //The rectangle's height. Positive values are down, and negative are up.*/                  
                                         drawObject(background,0,0,500,500);
-                                        
-                                        if(animation==0){                                       
+                                        foodtimer++;
+                                        if(foodtimer>100){
+                                          
+                                            foodList.push({"x":foodDrop[Math.round(Math.random()*9)], "y":0});
+                                            foodtimer=0;
+                                        }
+
+                                        if(catcher.onair){
+                                            drawObject(catcherFour,catcher.x,catcher.y,catcher.width,catcher.height);  
+
+                                        }
+                                        else if(animation==0){                                       
                                         drawObject(catcherTwo,catcher.x,catcher.y,catcher.width,catcher.height);  
                                         animation=1;
                                     
@@ -155,12 +199,51 @@
                                         animation=0;
 
                                     }
+                                    for (var i in foodList){
+                                        drawObject(food,foodList[i].x,foodList[i].y,foodObject.width,foodObject.height); // sending the arguments
+                                    }
                                         for (var i =0; i<tileList.length;i++){
                                            drawObject(tile,tileList[i].x,tileList[i].y,tileObject.width,tileObject.height); // sending the arguments
                                             }
 
+                                            for (var i in foodList) {
+                                                if(food_catcher_collision(foodList[i])) {
+                                                    score++;
+                                                    foodList.splice(i,1);
+                                                }
+                                            }
+
+                                            for (var i in foodList) {
+                                                for(var j in tileList){
+                                                    if(food_tile_collision(foodList[i],tileList[j])){
+                                                        tileList.splice(j,1);
+                                                        console.log("a");
+
+                                                    }
+                                                }
+                                                
+                                             }
+                                             if(!catcher.onair){
+                                                 for(var i in tileList) {
+                                                     if (catcher_tile_collision(tileList[i])){
+                                                        catcher.safe=true;
+                                                    break;
+                                                     }
+                                                     catcher.safe=false; 
+                                                 }
+                                                 if(!catcher.safe){
+                                                    catcher.y+=catcher.gravity;
+                                                 }
+
+                                             }
+
+                                     
+
+
                                           
-                                            updateCathcerPosition();  
+                                             updateCathcerPosition();  
+                                            updateFoodPosition();
+                                          
                                             jumpFunction();
                                            
                                         }
@@ -223,4 +306,6 @@
 
     </body>
 </html>
+
+
 
